@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Authentication State</title>
+</head>
+<body>
+    <h1>Debug Authentication State</h1>
+    <div id="debug"></div>
+    
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="checkState()">Check State</button>
+    
+    <script>
+        function checkState() {
+            const token = localStorage.getItem('mhbs_token');
+            const user = localStorage.getItem('mhbs_user');
+            document.getElementById('debug').innerHTML = `
+                <h3>Current State:</h3>
+                <p>Token: ${token ? 'EXISTS' : 'NONE'}</p>
+                <p>User: ${user ? JSON.stringify(JSON.parse(user)) : 'NONE'}</p>
+                <p>Token Value: ${token}</p>
+            `;
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('mhbs_token');
+            localStorage.removeItem('mhbs_user');
+            alert('Storage cleared!');
+            checkState();
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (data.token) {
+                    localStorage.setItem('mhbs_token', data.token);
+                    localStorage.setItem('mhbs_user', JSON.stringify({
+                        username: 'admin', role: 'ADMIN', email: 'admin@example.com'
+                    }));
+                    alert('Login successful!');
+                    checkState();
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+                alert('Login failed: ' + error.message);
+            }
+        }
+        
+        // Auto check on load
+        checkState();
+    </script>
+</body>
+</html>
