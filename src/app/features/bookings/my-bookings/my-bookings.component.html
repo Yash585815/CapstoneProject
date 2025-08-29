@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <div class="page-title mb-2 d-flex justify-content-between align-items-center">
+    <h3 class="m-0">My Bookings</h3>
+    <div>
+      <button class="btn btn-outline-secondary me-2" (click)="refresh()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+        Refresh
+      </button>
+      <a routerLink="/bookings/add" class="btn btn-primary">New Booking</a>
+    </div>
+  </div>
+  <div class="container-card">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="text-center p-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading your bookings...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="alert alert-warning" role="alert">
+      <strong>{{ error }}</strong>
+      <div class="mt-2">
+        <a routerLink="/bookings/add" class="btn btn-primary">Create Your First Booking</a>
+      </div>
+    </div>
+    
+    <!-- Success state with data -->
+    <div *ngIf="!loading && !error && bookings.length > 0" class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Hall ID</th>
+            <th>Date</th>
+            <th>Guests</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bookings">
+            <td>{{ b.id }}</td>
+            <td>{{ b.customerName }}</td>
+            <td>{{ b.hallId }}</td>
+            <td>{{ b.eventDate | date }}</td>
+            <td>{{ b.numberOfGuests }}</td>
+            <td>₹{{ b.totalAmount }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'bg-secondary': b.bookingStatus === 'PENDING',
+                'bg-success': b.bookingStatus === 'CONFIRMED',
+                'bg-danger': b.bookingStatus === 'CANCELLED'
+              }">{{ b.bookingStatus }}</span>
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/bookings', b.id]">View</a>
+              <a class="btn btn-sm btn-outline-secondary me-2" [routerLink]="['/bookings', b.id, 'edit']">Edit</a>
+              <button class="btn btn-sm btn-outline-warning me-2"
+                      (click)="cancel(b)"
+                      [disabled]="processingIds.has(b.id!) || !canCancel(b)">
+                Cancel
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="remove(b)"
+                      [disabled]="processingIds.has(b.id!) || !canDelete(b)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Empty state -->
+    <div *ngIf="!loading && !error && bookings.length === 0" class="text-center p-4">
+      <h5>No bookings yet</h5>
+      <p class="text-muted">You haven't made any bookings yet.</p>
+      <a routerLink="/bookings/add" class="btn btn-primary">Create Your First Booking</a>
+    </div>
+  </div>
+</div>

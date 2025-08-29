@@ -1,0 +1,25 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      <h3 class="mb-3">Login</h3>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input class="form-control" formControlName="username" />
+          <div class="text-danger" *ngIf="form.controls.username.touched && form.controls.username.invalid">
+            Required
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" formControlName="password" />
+          <div class="text-danger" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+            Minimum 6 characters
+          </div>
+        </div>
+        <div class="text-danger" *ngIf="error">{{ error }}</div>
+        <button class="btn btn-primary w-100" [disabled]="form.invalid">Login</button>
+      </form>
+    </div>
+  </div>
+</div>

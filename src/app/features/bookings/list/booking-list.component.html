@@ -1,0 +1,37 @@
+<div class="container mt-4">
+  <div class="page-title mb-2">
+    <h3 class="m-0">All Bookings</h3>
+  </div>
+  <div class="container-card">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Hall</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Guests</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bookings">
+            <td>{{ b.id }}</td>
+            <td>{{ b.hallId }}</td>
+            <td>{{ b.customerName }}</td>
+            <td>{{ b.eventDate | date }}</td>
+            <td>{{ b.numberOfGuests }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'bg-secondary': b.bookingStatus === 'PENDING',
+                'bg-success': b.bookingStatus === 'CONFIRMED',
+                'bg-danger': b.bookingStatus === 'CANCELLED'
+              }">{{ b.bookingStatus }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

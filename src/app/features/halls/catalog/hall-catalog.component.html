@@ -1,0 +1,15 @@
+<div class="container mt-4">
+  <h3>Hall Catalog</h3>
+  <div class="row row-cols-1 row-cols-md-3 g-4 mt-1">
+    <div class="col" *ngFor="let h of halls">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ h.name }}</h5>
+          <p class="card-text">{{ h.location }} • {{ h.capacity }} guests</p>
+          <p class="card-text"><strong>{{ h.pricePerDay | currency }}</strong></p>
+          <a class="btn btn-outline-primary" [routerLink]="['/halls', h.id]">View</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

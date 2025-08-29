@@ -1,0 +1,8 @@
+<div class="container mt-4" *ngIf="hall">
+  <h3>{{ hall.name }}</h3>
+  <p><strong>Location:</strong> {{ hall.location }}</p>
+  <p><strong>Capacity:</strong> {{ hall.capacity }}</p>
+  <p><strong>Price/Day:</strong> {{ hall.pricePerDay | currency }}</p>
+  <p><strong>Amenities:</strong> {{ hall.amenities }}</p>
+  <a class="btn btn-primary" [routerLink]="['/bookings/add']" [queryParams]="{ hallId: hall.id }">Book Now</a>
+</div>

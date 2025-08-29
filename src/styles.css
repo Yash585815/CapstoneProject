@@ -1,0 +1,35 @@
+/* Global theme styles */
+:root {
+  --mhbs-primary: #0d6efd;
+  --mhbs-dark: #212529;
+  --mhbs-light: #f8f9fa;
+}
+
+body {
+  background-color: var(--mhbs-light);
+}
+
+.container-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.06);
+  padding: 1.25rem;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.table thead th {
+  background-color: #f1f3f5;
+}
+
+.form-label { font-weight: 600; }
+
+app-sidebar .list-group-item.active,
+app-sidebar .list-group-item:hover { color: #0d6efd; }
+
+/* Header tweaks */
+.navbar-brand { font-weight: 700; letter-spacing: .5px; }
