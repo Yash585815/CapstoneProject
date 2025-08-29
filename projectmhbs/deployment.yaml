@@ -1,0 +1,165 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mhbs-backend-deployment
+  namespace: default
+  labels:
+    app: mhbs-backend
+    version: v1
+    tier: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: mhbs-backend
+  template:
+    metadata:
+      labels:
+        app: mhbs-backend
+        version: v1
+        tier: backend
+    spec:
+      containers:
+      - name: projectmhbs-mhbs-app
+        image: yashk08/mhbs-app:latest  # Replace with your actual image registry/repository
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        # Database Configuration
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:h2:mem:mhbsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: "org.h2.Driver"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "sa"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: ""
+        
+        # JPA Configuration
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: "org.hibernate.dialect.H2Dialect"
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        
+        # H2 Console Configuration
+        - name: SPRING_H2_CONSOLE_ENABLED
+          value: "true"
+        - name: SPRING_H2_CONSOLE_PATH
+          value: "/h2-console"
+        
+        # JWT Configuration (use ConfigMap and Secrets in production)
+        - name: MHBS_JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mhbs-secrets
+              key: jwt-secret
+              optional: true
+        - name: MHBS_JWT_EXPIRATION
+          value: "86400000"
+        
+        # Application Configuration
+        - name: SPRING_APPLICATION_NAME
+          value: "projectmhbs"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "default"
+        
+        # Java Options for containerized environment
+        - name: JAVA_OPTS
+          value: "-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        volumeMounts:
+        - name: app-logs
+          mountPath: /app/logs
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+      volumes:
+      - name: app-logs
+        emptyDir: {}
+      
+      securityContext:
+        fsGroup: 1001
+      
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+---
+# ConfigMap for application configuration (optional)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mhbs-config
+  namespace: default
+  labels:
+    app: mhbs-backend
+data:
+  application.properties: |
+    spring.application.name=projectmhbs
+    spring.datasource.url=jdbc:h2:mem:mhbsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    spring.datasource.driverClassName=org.h2.Driver
+    spring.datasource.username=sa
+    spring.datasource.password=
+    spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+    spring.jpa.hibernate.ddl-auto=update
+    spring.h2.console.enabled=true
+    spring.h2.console.path=/h2-console
+    spring.jpa.show-sql=false
+
+---
+# Secret for JWT configuration (create this manually with your actual secret)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mhbs-secrets
+  namespace: default
+  labels:
+    app: mhbs-backend
+type: Opaque
+data:
+  # Base64 encoded JWT secret - replace with your actual secret
+  # echo -n "your_very_secure_jwt_secret_key_here_change_in_production" | base64
+  jwt-secret: eW91cl92ZXJ5X3NlY3VyZV9qd3Rfc2VjcmV0X2tleV9oZXJlX2NoYW5nZV9pbl9wcm9kdWN0aW9u
